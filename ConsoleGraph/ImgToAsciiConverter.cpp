@@ -21,10 +21,17 @@ void AsciiConvert::converter(bool consout) {
 	sf::Vector2u Resolution = img.getSize();
 
 	sf::Image newImg = sf::Image();
-
-	newImg.create(Resolution.x / (11.0f / 24.0f), Resolution.y);
+	Resolution.x /= (11.0f / 24.0f);
+	if (Resolution.x > screen.getResolutionX())
+	{
+		Resolution.x = screen.getResolutionX();
+		Resolution.y = screen.getResolutionY();
+	}
+	newImg.create(Resolution.x, Resolution.y);
+	
 	image_resize(img, newImg);
 	Resolution = newImg.getSize();
+	
 
 	float max_bright = brightness(255, 255, 255);
 
