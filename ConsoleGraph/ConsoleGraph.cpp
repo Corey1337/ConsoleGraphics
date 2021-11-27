@@ -1,6 +1,12 @@
 ﻿#include <iostream>
+#include "ImgToAsciiConverter.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    
+    AsciiConvert* conv = new AsciiConvert("test5.gif", "ascii.txt");
+    conv->converter(true);
+    delete conv;
+
+	return 0;
 }
