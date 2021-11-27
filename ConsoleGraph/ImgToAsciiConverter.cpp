@@ -21,13 +21,14 @@ void AsciiConvert::converter(bool consout) {
 	sf::Vector2u Resolution = img.getSize();
 
 	sf::Image newImg = sf::Image();
-	Resolution.x /= (11.0f / 24.0f);
-	if (Resolution.x > screen.getResolutionX())
+	//Resolution.x /= (11.0f / 24.0f);
+	if (Resolution.x > 1900)
 	{
-		Resolution.x = screen.getResolutionX();
-		Resolution.y = screen.getResolutionY();
+		float coef = static_cast<float>(Resolution.x) / 1899;
+		Resolution.x = 1899;
+		Resolution.y /= coef;
 	}
-	newImg.create(Resolution.x, Resolution.y);
+	newImg.create(Resolution.x, Resolution.y * (11.0f / 24.0f));
 	
 	image_resize(img, newImg);
 	Resolution = newImg.getSize();

@@ -4,7 +4,7 @@
 int main()
 {
     
-    AsciiConvert* conv = new AsciiConvert("aska.jpg", "ascii.txt");
+    AsciiConvert* conv = new AsciiConvert("test1.jpg", "ascii.txt");
     conv->converter(true);
     delete conv;
 
