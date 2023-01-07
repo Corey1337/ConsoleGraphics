@@ -1,24 +1,22 @@
 #include "ImgToAsciiConverter.h"
 
-AsciiConvert::AsciiConvert(const char* source, const char* result) {
-	txtresult.open(result);
-	img.loadFromFile(source);
-	
-}
-
-AsciiConvert::~AsciiConvert() {
+AsciiConvert::~AsciiConvert()
+{
 	screen.reset();
-	txtresult.close();
 }
 
-void AsciiConvert::converter(bool consout) {
+void AsciiConvert::set_img(cv::Mat source)
+{
+	img.create(source.cols, source.rows, source.ptr());
+}
 
+void AsciiConvert::converter()
+{
+	Resolution = img.getSize();
 	std::string res = "";
-
-	sf::Vector2u Resolution = img.getSize();
-
 	sf::Image newImg = sf::Image();
-	//Resolution.x /= (11.0f / 24.0f);
+
+	// Resolution.x /= (11.0f / 24.0f);
 	if (Resolution.x > 1900)
 	{
 		float coef = static_cast<float>(Resolution.x) / 1899;
@@ -26,10 +24,9 @@ void AsciiConvert::converter(bool consout) {
 		Resolution.y /= coef;
 	}
 	newImg.create(Resolution.x, Resolution.y * (11.0f / 24.0f));
-	
-	image_resize(img, newImg);
+
+	image_resize(newImg);
 	Resolution = newImg.getSize();
-	
 
 	float max_bright = brightness(255, 255, 255);
 
@@ -44,32 +41,43 @@ void AsciiConvert::converter(bool consout) {
 		}
 		res += "\n";
 	}
-	txtresult << res;
-	if (consout)
-	{
-		screen.SetFont(0, 1899 / Resolution.x);
-		std::cout << res;
-		screen.fullScreen();
-	}
-
+	result = res;
 }
 
-float AsciiConvert::brightness(int R, int G, int B) {
+float AsciiConvert::brightness(int R, int G, int B)
+{
 	float bright = 0.33 * R + 0.5 * G + 0.16 * B;
 	return bright;
 }
 
-void AsciiConvert::image_resize(sf::Image& img, sf::Image& newImg)
-{	
-	const sf::Vector2u oldSize{ img.getSize() };
-	const sf::Vector2u newSize{ newImg.getSize() };
-	for (unsigned int y{ 0u }; y < newSize.y; ++y)
+void AsciiConvert::image_resize(sf::Image &newImg)
+{
+	const sf::Vector2u oldSize{img.getSize()};
+	const sf::Vector2u newSize{newImg.getSize()};
+	for (unsigned int y{0u}; y < newSize.y; ++y)
 	{
-		for (unsigned int x{ 0u }; x < newSize.x; ++x)
+		for (unsigned int x{0u}; x < newSize.x; ++x)
 		{
-			unsigned int origX{ static_cast<unsigned int>(static_cast<double>(x) / newSize.x * oldSize.x) };
-			unsigned int origY{ static_cast<unsigned int>(static_cast<double>(y) / newSize.y * oldSize.y) };
+			unsigned int origX{static_cast<unsigned int>(static_cast<double>(x) / newSize.x * oldSize.x)};
+			unsigned int origY{static_cast<unsigned int>(static_cast<double>(y) / newSize.y * oldSize.y)};
 			newImg.setPixel(x, y, img.getPixel(origX, origY));
 		}
 	}
+}
+
+std::string AsciiConvert::ascii_out(bool console_out, bool txt_out)
+{
+	if (txt_out)
+	{
+		txtresult.open("ascii.txt");
+		txtresult << result;
+		txtresult.close();
+	}
+	if (console_out)
+	{
+		screen.SetFont(0, 1899 / Resolution.x);
+		std::cout << result;
+		screen.fullScreen();
+	}
+	return result;
 }
