@@ -1,11 +1,10 @@
 ﻿#include <iostream>
-#include "ImgToAsciiConverter.h"
+#include "VideoToAscii.h"
 #include "area.h"
 #include "Menu.h"
-#include <opencv2/opencv.hpp>
 
 
-void ImgToAscii(const char* Img_Name)
+void ImgToAscii(std::string Img_Name)
 {
 	cv::Mat img_cv;
     img_cv = cv::imread(Img_Name, cv::IMREAD_COLOR);
@@ -16,30 +15,48 @@ void ImgToAscii(const char* Img_Name)
 	}
     else
     {
-        cv::Mat img_cv_tmp;
-        cv::cvtColor(img_cv, img_cv_tmp, cv::COLOR_BGR2RGBA);
-
-        AsciiConvert *conv = new AsciiConvert();
-        conv->set_img(img_cv_tmp);
+        AsciiConvert *conv = new AsciiConvert(img_cv);
         conv->converter();
-        conv->ascii_out(true, true);
+        // conv->ascii_out(true, true);
+
+        // using std::chrono::high_resolution_clock;
+        // using std::chrono::duration_cast;
+        // using std::chrono::duration;
+        // using std::chrono::milliseconds;
+
+        // auto t1 = high_resolution_clock::now();
+        conv->ascii_out(true, false);
+        // auto t2 = high_resolution_clock::now();
         getchar();
         
         delete conv;
+
+        // auto ms_int = duration_cast<milliseconds>(t2 - t1);
+        // duration<double, std::milli> ms_double = t2 - t1;
+
+        // std::cout << ms_int.count() << "ms\n";
+        // std::cout << ms_double.count() << "ms\n";
 
     }
 
 
 }
 
-void VideoToAscii(const char* Video_Name)
+void VideoToAscii(std::string Video_Name)
 {
-    // sfe::Movie movie;
+    cv::VideoCapture capture(Video_Name);
+    cv::Mat frame;
 
-    // if (!movie.openFromFile(Video_Name))
-    // {
-    //     std::cout << "failed to open movie";
-    // }
+    if( !capture.isOpened() )
+        throw "Error when reading steam_avi";
+
+    else
+    {
+        VideoConverter *conv = new VideoConverter(capture);
+        conv->converter();
+        conv->ascii_out();
+        delete conv;
+    }
 
 }
 
@@ -58,11 +75,11 @@ int main()
 
     menu.add_row(
         " 1. Img to ascii", [&]()
-        { ImgToAscii("aska.jpg"); });
+        { ImgToAscii("720.jpg"); });
 
     menu.add_row(
         " 2. Video to ascii", [&]()
-        { VideoToAscii("5sec.mp4"); });
+        { VideoToAscii("360.mp4"); });
 
     menu.add_row(
         " 3. Animated Ball", [&]()

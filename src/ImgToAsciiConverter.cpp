@@ -1,5 +1,15 @@
 #include "ImgToAsciiConverter.h"
 
+AsciiConvert::AsciiConvert(cv::Mat source)
+{
+    set_img(source);
+}
+
+AsciiConvert::AsciiConvert(sf::Image source)
+{
+	img = source;
+}
+
 AsciiConvert::~AsciiConvert()
 {
 	screen.reset();
@@ -7,23 +17,42 @@ AsciiConvert::~AsciiConvert()
 
 void AsciiConvert::set_img(cv::Mat source)
 {
-	img.create(source.cols, source.rows, source.ptr());
+	cv::Mat img_cv_tmp;
+    cv::cvtColor(source, img_cv_tmp, cv::COLOR_BGR2RGBA);
+	img.create(img_cv_tmp.cols, img_cv_tmp.rows, img_cv_tmp.ptr());
+	Resolution = img.getSize();
+}
+
+sf::Vector2u AsciiConvert::getResolution()
+{
+	return Resolution;
 }
 
 void AsciiConvert::converter()
 {
-	Resolution = img.getSize();
+	float symbol_ratio = screen.symbol_ratio;
+	int MaxWidth = screen.getMaxConsoleWidth();
+	int MaxHeight = screen.getMaxConsoleHeight() / symbol_ratio;
+	screen.moveConsole();
+
 	std::string res = "";
 	sf::Image newImg = sf::Image();
 
 	// Resolution.x /= (11.0f / 24.0f);
-	if (Resolution.x > 1900)
+	if (Resolution.x > MaxWidth)
 	{
-		float coef = static_cast<float>(Resolution.x) / 1899;
-		Resolution.x = 1899;
+		float coef = static_cast<float>(Resolution.x) / MaxWidth;
+		Resolution.x = MaxWidth;
 		Resolution.y /= coef;
 	}
-	newImg.create(Resolution.x, Resolution.y * (11.0f / 24.0f));
+	if(Resolution.y > MaxHeight)
+	{
+		float coef = static_cast<float>(Resolution.y) / MaxHeight;
+		Resolution.y = MaxHeight;
+		Resolution.x /= coef;
+	}
+
+	newImg.create(Resolution.x, Resolution.y * symbol_ratio);
 
 	image_resize(newImg);
 	Resolution = newImg.getSize();
@@ -75,9 +104,12 @@ std::string AsciiConvert::ascii_out(bool console_out, bool txt_out)
 	}
 	if (console_out)
 	{
-		screen.SetFont(0, 1899 / Resolution.x);
+		screen.SetFont(0, 3);
+		screen.SetWindow(Resolution.x, Resolution.y);
+		// screen.fullScreen();
 		std::cout << result;
-		screen.fullScreen();
+		// screen.gotoZero();
+		// screen.clearScreen();
 	}
 	return result;
 }

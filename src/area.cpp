@@ -14,7 +14,7 @@ Area::Area(int width, int height) {
 	screen.SetFont();
 
 	aspect_ratio = (float)width / height;
-	simbol_ratio = 11.0f / 24.0f;
+	simbol_ratio = screen.symbol_ratio;
 
 	std::string str(width, ' ');
 	area.resize(height, str);
