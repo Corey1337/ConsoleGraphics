@@ -22,7 +22,7 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/lib/InteractiveConsoleMenu/Menu.h
     )
     
-target_link_libraries(${PROJECT_NAME} sfml-graphics)
+target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-audio)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 

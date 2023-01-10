@@ -96,7 +96,7 @@ void AsciiConvert::image_resize(sf::Image &newImg)
 
 std::string AsciiConvert::ascii_out(bool console_out, bool txt_out)
 {
-	if (txt_out)
+	if (false)
 	{
 		txtresult.open("ascii.txt");
 		txtresult << result;
@@ -106,10 +106,7 @@ std::string AsciiConvert::ascii_out(bool console_out, bool txt_out)
 	{
 		screen.SetFont(0, 3);
 		screen.SetWindow(Resolution.x, Resolution.y);
-		// screen.fullScreen();
 		std::cout << result;
-		// screen.gotoZero();
-		// screen.clearScreen();
 	}
 	return result;
 }

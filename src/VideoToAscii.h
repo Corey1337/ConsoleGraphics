@@ -16,4 +16,7 @@ private:
     std::vector<std::string> ascii_frames;
 	sf::Vector2u Resolution;
     cv::VideoCapture capture;
+    double fps;
+    double frames_Count;
+    double duration_ms;
 };

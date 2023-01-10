@@ -58,7 +58,7 @@ void Screen::SetWindow(int ConsWidth, int ConsHeight)
 	SetConsoleScreenBufferSize(Handle, coord);
 	SetConsoleWindowInfo(Handle, TRUE, &Rect);
 }
-#include <iostream>
+
 int Screen::getResolutionX()
 {
 	// std::cout << GetSystemMetrics(SM_CXSCREEN);
