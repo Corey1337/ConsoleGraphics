@@ -2,7 +2,7 @@
 
 AsciiConvert::AsciiConvert(cv::Mat source)
 {
-    set_img(source);
+    setImg(source);
 }
 
 AsciiConvert::AsciiConvert(sf::Image source)
@@ -15,7 +15,7 @@ AsciiConvert::~AsciiConvert()
 	screen.reset();
 }
 
-void AsciiConvert::set_img(cv::Mat source)
+void AsciiConvert::setImg(cv::Mat source)
 {
 	cv::Mat img_cv_tmp;
     cv::cvtColor(source, img_cv_tmp, cv::COLOR_BGR2RGBA);
@@ -28,9 +28,13 @@ sf::Vector2u AsciiConvert::getResolution()
 	return Resolution;
 }
 
-void AsciiConvert::converter()
-{
-	float symbol_ratio = screen.symbol_ratio;
+void AsciiConvert::converter(int fontSize)
+{	
+	if(screen.getFont() != fontSize)
+	{
+		screen.setFont(0, fontSize);
+	}
+	float symbol_ratio = screen.symbolRatio;
 	int MaxWidth = screen.getMaxConsoleWidth();
 	int MaxHeight = screen.getMaxConsoleHeight() / symbol_ratio;
 	screen.moveConsole();
@@ -54,7 +58,7 @@ void AsciiConvert::converter()
 
 	newImg.create(Resolution.x, Resolution.y * symbol_ratio);
 
-	image_resize(newImg);
+	imageResize(newImg);
 	Resolution = newImg.getSize();
 
 	float max_bright = brightness(255, 255, 255);
@@ -65,10 +69,10 @@ void AsciiConvert::converter()
 		{
 			sf::Color cur_color = newImg.getPixel(x, y);
 			float bright = brightness(cur_color.r, cur_color.g, cur_color.b);
-			int pixel_pos = (int)((bright / max_bright) * (screen.GetGradiSize() - 1));
-			res += screen.GetGradi()[pixel_pos];
+			int pixel_pos = (int)((bright / max_bright) * (screen.getGradiSize() - 1));
+			res += screen.getGradi()[pixel_pos];
 		}
-		res += "\n";
+		// res += "\n";
 	}
 	result = res;
 }
@@ -79,7 +83,7 @@ float AsciiConvert::brightness(int R, int G, int B)
 	return bright;
 }
 
-void AsciiConvert::image_resize(sf::Image &newImg)
+void AsciiConvert::imageResize(sf::Image &newImg)
 {
 	const sf::Vector2u oldSize{img.getSize()};
 	const sf::Vector2u newSize{newImg.getSize()};
@@ -94,18 +98,17 @@ void AsciiConvert::image_resize(sf::Image &newImg)
 	}
 }
 
-std::string AsciiConvert::ascii_out(bool console_out, bool txt_out)
+std::string AsciiConvert::asciiOut(bool consoleOut, bool txtOut)
 {
-	if (false)
+	if (txtOut)
 	{
 		txtresult.open("ascii.txt");
 		txtresult << result;
 		txtresult.close();
 	}
-	if (console_out)
+	if (consoleOut)
 	{
-		screen.SetFont(0, 3);
-		screen.SetWindow(Resolution.x, Resolution.y);
+		screen.setWindow(Resolution.x, Resolution.y);
 		std::cout << result;
 	}
 	return result;

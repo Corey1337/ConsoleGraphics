@@ -9,6 +9,7 @@ find_package(SFML REQUIRED COMPONENTS system window graphics audio)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+
 add_executable(${PROJECT_NAME}
     ConsoleGraph.cpp
     area.cpp
@@ -25,8 +26,6 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-audio)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
-
-# set(CMAKE_PREFIX_PATH ${PROJECT_SOURCE_DIR}/lib/SFML-2.5.1/lib/cmake/SFML)
 
 # message(STATUS "${CMAKE_PREFIX_PATH}")
 # macro(print_all_variables)

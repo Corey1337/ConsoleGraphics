@@ -5,8 +5,6 @@
 
 Screen::Screen()
 {
-	SetFont(0, 3);
-	fullScreen();	
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
 	{
@@ -15,36 +13,67 @@ Screen::Screen()
 	}
 	else
 	{
-		MaxConsoleWidth = csbi.srWindow.Right - csbi.srWindow.Left;
-		MaxConsoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top;
+		setFont(0, 16);
+		fullScreen();	
+		maxConsoleWidth = csbi.srWindow.Right - csbi.srWindow.Left;
+		maxConsoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top;
 	}
 	reset();
 }
 
-std::string Screen::GetGradi()
+std::string Screen::getGradi()
 {
 	return gradient;
 }
 
-int64_t Screen::GetGradiSize()
+int64_t Screen::getGradiSize()
 {
 	return gradient.size();
 }
 
-void Screen::SetFont(int FontX, int FontY)
+int Screen::getFont()
 {
-	CONSOLE_FONT_INFOEX cfi;
-	cfi.cbSize = sizeof(cfi);
-	cfi.nFont = 0;
-	cfi.dwFontSize.X = FontX; // Width of each character in the font
-	cfi.dwFontSize.Y = FontY; // Height
-	cfi.FontFamily = FF_DONTCARE;
-	cfi.FontWeight = FW_NORMAL;
-	wcscpy_s(cfi.FaceName, L"Consolas"); // Choose your font
-	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+	// HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	// CONSOLE_FONT_INFOEX fontInfo;
+
+	// if (!GetCurrentConsoleFontEx(hOut, TRUE, &fontInfo))
+    // 	std::cout << GetLastError() << std::endl;
+	// std::cout << std::endl << fontInfo.dwFontSize.Y << "==" << fontSize << std::endl;
+	return fontSize;
 }
 
-void Screen::SetWindow(int ConsWidth, int ConsHeight)
+void Screen::setFont(int FontX, int FontY)
+{
+	if(fontSize != FontY)
+	{
+		CONSOLE_FONT_INFOEX cfi;
+		cfi.cbSize = sizeof(cfi);
+		cfi.nFont = 0;
+		cfi.dwFontSize.X = FontX;
+		cfi.dwFontSize.Y = FontY;
+		fontSize = FontY;
+		cfi.FontFamily = FF_DONTCARE;
+		cfi.FontWeight = FW_NORMAL;
+		wcscpy_s(cfi.FaceName, L"Consolas"); // Choose your font
+		SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		fullScreen();
+		if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
+		{
+			// an error occourred
+			std::cerr << "Cannot determine console size." << std::endl;
+		}
+		else
+		{
+			maxConsoleWidth = csbi.srWindow.Right - csbi.srWindow.Left;
+			maxConsoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top;
+			ShowWindow(GetConsoleWindow(), SW_NORMAL);
+		}
+	}
+}
+
+void Screen::setWindow(int ConsWidth, int ConsHeight)
 {
 	_COORD coord;
 	coord.X = ConsWidth;
@@ -61,20 +90,17 @@ void Screen::SetWindow(int ConsWidth, int ConsHeight)
 
 int Screen::getResolutionX()
 {
-	// std::cout << GetSystemMetrics(SM_CXSCREEN);
 	return GetSystemMetrics(SM_CXSCREEN);
 }
 
 int Screen::getResolutionY()
 {
-	// std::cout << GetSystemMetrics(SM_CYSCREEN);
 	return GetSystemMetrics(SM_CYSCREEN);
 }
 
 void Screen::fullScreen()
 {
 	ShowWindow(GetConsoleWindow(), SW_MAXIMIZE);
-	// SendMessage(GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000); //������ ����� ��� �����
 }
 
 void Screen::gotoZero()
@@ -89,7 +115,7 @@ void Screen::clearScreen()
 	printf("\033[2J");
 }
 
-void Screen::gotoxy(int x, int y)
+void Screen::gotoXY(int x, int y)
 {
 	COORD coordinates = {(short)x, (short)y};
 	HANDLE outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -105,19 +131,18 @@ void Screen::moveConsole(int x, int y)
 
 void Screen::reset()
 {
-	clearScreen();
-	SetFont();
+	system("cls");
+	gotoZero();
+	setFont();
 	ShowWindow(GetConsoleWindow(), SW_NORMAL);
-	SetWindow(120, 30);
+	setWindow(120, 30);
 }
 
 int Screen::getMaxConsoleWidth()
 {
-	
-	return MaxConsoleWidth;
+	return maxConsoleWidth;
 }
 int Screen::getMaxConsoleHeight()
 {
-	
-	return MaxConsoleHeight;
+	return maxConsoleHeight;
 }

@@ -7,22 +7,27 @@
 
 void ImgToAscii()
 {
-    std::string img_name;
+    std::string imgName;
     std::cout << "Image name or full path: ";
-    std::cin >> img_name;
+    std::cin >> imgName;
 
-	cv::Mat img_cv;
-    img_cv = cv::imread(img_name, cv::IMREAD_COLOR);
+    int fontSize;
+    std::cout << "Set font size: ";
+    std::cin >> fontSize;
+    std::cout << std::endl;
 
-	if (img_cv.empty())
+	cv::Mat imgCV;
+    imgCV = cv::imread(imgName, cv::IMREAD_COLOR);
+
+	if (imgCV.empty())
 	{
-		std::cout << "Could not read the image: " << img_name << std::endl;
+		std::cout << "Could not read the image: " << imgName << std::endl;
 	}
     else
     {
-        AsciiConvert *conv = new AsciiConvert(img_cv);
-        conv->converter();
-        conv->ascii_out();
+        AsciiConvert *conv = new AsciiConvert(imgCV);
+        conv->converter(fontSize);
+        conv->asciiOut();
         getchar();
         getchar();
         delete conv;
@@ -31,24 +36,32 @@ void ImgToAscii()
 
 void VideoToAscii()
 {
-    std::string video_name;
+    std::string videoName;
     std::cout << "Video name or full path: ";
-    std::cin >> video_name;
+    std::cin >> videoName;
+    std::cout << std::endl;
 
-    cv::VideoCapture capture(video_name);
+    int fontSize;
+    std::cout << "Set font size: ";
+    std::cin >> fontSize;
+    std::cout << std::endl;
+
+
+    cv::VideoCapture capture(videoName);
 
     if(!capture.isOpened())
         throw "Error when reading steam_avi";
     else
     {
-        std::string audio_conv_command = "ffmpeg -i " + video_name + " -vn sound.wav"; //need to ffmpeg installed
+        std::string audio_conv_command = "ffmpeg -i " + videoName + " -vn sound.wav"; //need to ffmpeg installed
         system(audio_conv_command.c_str());
         VideoConverter *conv = new VideoConverter(capture);
-        conv->converter();
+        conv->converter(fontSize);
         std::cout << "Press key to start" << std::endl;
         getchar();
         getchar();
-        conv->ascii_out();
+        conv->ascii_out(true, false);
+        getchar();
         delete conv;
     }
 }

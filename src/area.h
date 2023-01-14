@@ -1,4 +1,4 @@
-
+#include "ScreenSettings.h"
 #include <vector>
 #include <string>
 
@@ -6,14 +6,15 @@ class Area {
 public:
 	Area(int width, int height);
 
-	void fill();
-
-
 	~Area();
+
+	void fill();
+	
 private:
+	Screen screen;
 	std::vector<std::string> area;
 	int width;
 	int height;
-	float aspect_ratio;
-	float simbol_ratio;
+	float aspectRatio;
+	float simbolRatio;
 };
