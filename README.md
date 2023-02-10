@@ -1,6 +1,6 @@
 # Console Graphics
 
-Convert images and videos to ascii
+Convert images and video to ascii
 
 ## Installation
 
