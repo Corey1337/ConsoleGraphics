@@ -2,7 +2,7 @@
 #include "SFML/Audio.hpp"
 #include <Windows.h>
 
-VideoConverter::VideoConverter(cv::VideoCapture video)
+VideoConverter::VideoConverter(const cv::VideoCapture& video)
 {
     capture = video;
     fps = capture.get(cv::CAP_PROP_FPS);
@@ -15,7 +15,7 @@ VideoConverter::~VideoConverter()
     screen.reset();
 }
 
-void VideoConverter::converter(int fontSize)
+void VideoConverter::converter(short fontSize)
 {
     for (int i = 0;; i++)
     {
@@ -23,17 +23,17 @@ void VideoConverter::converter(int fontSize)
         capture >> frame;
         if (frame.empty())
             break;
-        asciiConverter.setImg(frame);
+        asciiConverter.setImage(frame);
         asciiConverter.converter(fontSize);
-        Resolution = asciiConverter.getResolution();
+        resolution = asciiConverter.getResolution();
         asciiFrames.push_back((std::string)asciiConverter.asciiOut(false, false));
-        screen.gotoZero();
-        screen.clearScreen();
+        Screen::gotoZero();
+        Screen::clearScreen();
     }
     std::cout << std::endl << "success" << std::endl;
 }
 
-void VideoConverter::ascii_out(bool consoleOut, bool txtOut)
+void VideoConverter::asciiOut(bool consoleOut, bool txtOut)
 {
     if (txtOut)
     {
@@ -50,14 +50,15 @@ void VideoConverter::ascii_out(bool consoleOut, bool txtOut)
     {
         std::ios_base::sync_with_stdio(false);
 
-        sf::Sound sound;
         sf::SoundBuffer buffer;
-        bool is_Sound_Loaded = buffer.loadFromFile("sound.wav");
-        if (!is_Sound_Loaded)
+        sf::Sound sound{buffer};
+
+        bool isSoundLoaded = buffer.loadFromFile("sound.wav");
+        if (!isSoundLoaded)
             std::cout << "Error: unable to load sound";
 
-        screen.clearScreen();
-        screen.setWindow(Resolution.x, Resolution.y);
+        Screen::clearScreen();
+        Screen::setWindow(resolution.x, resolution.y);
 
         using std::chrono::duration_cast;
         using std::chrono::high_resolution_clock;
@@ -66,27 +67,38 @@ void VideoConverter::ascii_out(bool consoleOut, bool txtOut)
         auto t1 = high_resolution_clock::now();
         auto t2 = high_resolution_clock::now();
 
-        if (is_Sound_Loaded)
+        if (isSoundLoaded)
         {
             sound.setBuffer(buffer);
             sound.play();
         }
 
 
-        HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+        HANDLE hConsole = CreateConsoleScreenBuffer(
+            GENERIC_READ | GENERIC_WRITE,
+            0,
+            nullptr,
+            CONSOLE_TEXTMODE_BUFFER,
+            nullptr);
+
         SetConsoleActiveScreenBuffer(hConsole);
         DWORD dwBytesWritten = 0;
 
-        auto ms_int = duration_cast<milliseconds>(t2 - t1);
-        while (ms_int.count() < durationMS)
+        auto msInt = duration_cast<milliseconds>(t2 - t1);
+        while (msInt.count() < durationMS)
         {
-            WriteConsoleOutputCharacter(hConsole, (LPCSTR)asciiFrames[framesCount * ms_int.count() / durationMS].data(), Resolution.x * Resolution.y, {0, 0}, &dwBytesWritten);
+            WriteConsoleOutputCharacter(
+                hConsole,
+                (LPCSTR)asciiFrames[framesCount * msInt.count() / durationMS].data(),
+                resolution.x * resolution.y,
+                {0, 0},
+                &dwBytesWritten);
 
-            ms_int = duration_cast<milliseconds>(high_resolution_clock::now() - t1);
+            msInt = duration_cast<milliseconds>(high_resolution_clock::now() - t1);
         }
         auto seq = L"\x1b[2J";
-        WriteConsoleW(hConsole, seq, (DWORD)wcslen(seq), &dwBytesWritten, NULL);
-        screen.clearScreen();
+        WriteConsoleW(hConsole, seq, (DWORD)wcslen(seq), &dwBytesWritten, nullptr);
+        Screen::clearScreen();
         std::remove("sound.wav");
     }
 }

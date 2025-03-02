@@ -1,23 +1,25 @@
+#pragma once
+
 #include <string>
 #include <vector>
 #include "ImgToAsciiConverter.h"
 
 class VideoConverter{
 public:
-    VideoConverter(cv::VideoCapture video);
+    explicit VideoConverter(const cv::VideoCapture& video);
 
     ~VideoConverter();
 
-    void converter(int fontSize);
+    void converter(short fontSize);
 
-    void ascii_out(bool consoleOut = true, bool txtOut = false);
+    void asciiOut(bool consoleOut = true, bool txtOut = false);
 
 private:
     cv::Mat frame;
     Screen screen;
     AsciiConvert asciiConverter;
     std::vector<std::string> asciiFrames;
-	sf::Vector2u Resolution;
+	sf::Vector2u resolution;
     cv::VideoCapture capture;
     double fps;
     double framesCount;

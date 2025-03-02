@@ -1,36 +1,37 @@
 #pragma once
 
 #include <string>
+#include "SFML/System/Vector2.hpp"
 
 class Screen {
 public:
 	Screen();
 
-	const float symbolRatio = 11.0f / 24.0f;
+	const sf::Vector2u symbolRatio {11, 24};
 	std::string getGradi();
-	int64_t getGradiSize();
-	void setFont(int FontX = 0, int FontY = 16);
-	int getFont();
-	void setWindow(int ConsWidth = 120, int ConsHeight = 30);
+	short getGradiSize() const;
+	void setFont(short fontX = 0, short fontY = 16);
+	int getFont() const;
+	static void setWindow(short consoleWidth = 120, short consoleHeight = 30);
 
-	int getResolutionX();
-	int getResolutionY();
-	int getMaxConsoleWidth();
-	int getMaxConsoleHeight();
+	static int getResolutionX();
+	static int getResolutionY();
+	[[nodiscard]] int getMaxConsoleWidth() const;
+	[[nodiscard]] int getMaxConsoleHeight() const;
 
-	void fullScreen();
-	void clearScreen();
-	void moveConsole(int x = 0, int y = 0);
-	void gotoXY(int x, int y);
-	void gotoZero();
+	static void fullScreen();
+	static void clearScreen();
+	static void moveConsole(int x = 0, int y = 0);
+	static void gotoXY(short x, short y);
+	static void gotoZero();
 	void reset();
 
 private:
-	//std::string gradient = " .:!/r(l1Z4H9W8$@";
-	std::string gradient = "@$8W9H4Z1l(r/!:. ";
-	int fontSize;
-	int currentConsoleWidth;
-	int currentConsoleHeight;
+	std::string gradient = " .:!/r(l1Z4H9W8$@";
+	// std::string gradient = "@$8W9H4Z1l(r/!:. ";
+	int fontSize{};
+	int currentConsoleWidth{};
+	int currentConsoleHeight{};
 	int maxConsoleWidth;
 	int maxConsoleHeight;
 };

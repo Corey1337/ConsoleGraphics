@@ -1,6 +1,6 @@
 ﻿#include <iostream>
-#include "stdlib.h"
 #include "VideoToAscii.h"
+#include "ImgToAsciiConverter.h"
 #include "area.h"
 #include "Menu.h"
 
@@ -11,27 +11,21 @@ void ImgToAscii()
     std::cout << "Image name or full path: ";
     std::cin >> imgName;
 
-    int fontSize;
-    std::cout << "Set font size: ";
-    std::cin >> fontSize;
-    std::cout << std::endl;
-
-	cv::Mat imgCV;
-    imgCV = cv::imread(imgName, cv::IMREAD_COLOR);
-
-	if (imgCV.empty())
-	{
+	if (sf::Image image; image.loadFromFile(imgName) == false) {
 		std::cout << "Could not read the image: " << imgName << std::endl;
+	} else {
+		short fontSize;
+		std::cout << "Set font size: ";
+		std::cin >> fontSize;
+		std::cout << std::endl;
+
+		auto *asciiConvert = new AsciiConvert(image);
+		asciiConvert->converter(fontSize);
+		asciiConvert->asciiOut();
+		getchar();
+		getchar();
+		delete asciiConvert;
 	}
-    else
-    {
-        AsciiConvert *conv = new AsciiConvert(imgCV);
-        conv->converter(fontSize);
-        conv->asciiOut();
-        getchar();
-        getchar();
-        delete conv;
-    }
 }
 
 void VideoToAscii()
@@ -41,7 +35,7 @@ void VideoToAscii()
     std::cin >> videoName;
     std::cout << std::endl;
 
-    int fontSize;
+    short fontSize;
     std::cout << "Set font size: ";
     std::cin >> fontSize;
     std::cout << std::endl;
@@ -49,21 +43,20 @@ void VideoToAscii()
 
     cv::VideoCapture capture(videoName);
 
-    if(!capture.isOpened())
-        throw "Error when reading steam_avi";
-    else
-    {
-        std::string audio_conv_command = "ffmpeg -i " + videoName + " -vn sound.wav"; //need to ffmpeg installed
-        system(audio_conv_command.c_str());
-        VideoConverter *conv = new VideoConverter(capture);
-        conv->converter(fontSize);
-        std::cout << "Press key to start" << std::endl;
-        getchar();
-        getchar();
-        conv->ascii_out(true, false);
-        getchar();
-        delete conv;
+    if(!capture.isOpened()) {
+	    throw "Error when reading steam_avi";
     }
+
+    std::string audio_conv_command = "ffmpeg -i " + videoName + " -vn sound.wav"; //need to ffmpeg installed
+    system(audio_conv_command.c_str());
+    auto *videoConvert = new VideoConverter(capture);
+    videoConvert->converter(fontSize);
+    std::cout << "Press key to start" << std::endl;
+    getchar();
+    getchar();
+    videoConvert->asciiOut(true, false);
+    getchar();
+    delete videoConvert;
 }
 
 void AnimatedBall()
@@ -85,12 +78,9 @@ int main()
         " 2. Video to ascii", [&]()
         { VideoToAscii(); });
 
-    menu.add_row(
-        " 3. Animated Ball", [&]()
-        { AnimatedBall(); });
+    menu.add_row(" 3. Animated Ball", [&](){ AnimatedBall(); });
 
-    menu.add_row(
-        "Exit", nullptr);
+    menu.add_row("Exit", nullptr);
 
     menu.run();
     return 0;

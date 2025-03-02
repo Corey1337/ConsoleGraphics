@@ -1,23 +1,41 @@
 #include "ScreenSettings.h"
 #include <cwchar>
 #include <iostream>
+
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
 #include <Windows.h>
+#elif defined(__linux__)
+#include <sys/ioctl.h>
+#endif
 
 Screen::Screen()
 {
+#if defined(_WIN32)
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
-	{
-		// an error occourred
-		std::cerr << "Cannot determine console size." << std::endl;
-	}
-	else
-	{
-		setFont(0, 16);
-		fullScreen();	
-		maxConsoleWidth = csbi.srWindow.Right - csbi.srWindow.Left;
-		maxConsoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top;
-	}
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	setFont(0, 16);
+	fullScreen();
+	maxConsoleWidth = (int)(csbi.srWindow.Right-csbi.srWindow.Left+1);
+	maxConsoleHeight = (int)(csbi.srWindow.Bottom-csbi.srWindow.Top+1);
+#elif defined(__linux__)
+	struct winsize w;
+	ioctl(fileno(stdout), TIOCGWINSZ, &w);
+	maxConsoleWidth = (int)(w.ws_col);
+	maxConsoleHeight = (int)(w.ws_row);
+#endif // Windows/Linux
+	// CONSOLE_SCREEN_BUFFER_INFO csbi;
+	// if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
+	// {
+	// 	// an error occourred
+	// 	std::cerr << "Cannot determine console size." << std::endl;
+	// }
+	// else
+	// {
+		// maxConsoleWidth = csbi.srWindow.Right - csbi.srWindow.Left;
+		// maxConsoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top;
+	// }
 	reset();
 }
 
@@ -26,12 +44,12 @@ std::string Screen::getGradi()
 	return gradient;
 }
 
-int64_t Screen::getGradiSize()
+short Screen::getGradiSize() const
 {
 	return gradient.size();
 }
 
-int Screen::getFont()
+int Screen::getFont() const
 {
 	// HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// CONSOLE_FONT_INFOEX fontInfo;
@@ -42,16 +60,16 @@ int Screen::getFont()
 	return fontSize;
 }
 
-void Screen::setFont(int FontX, int FontY)
+void Screen::setFont(short fontX, short fontY)
 {
-	if(fontSize != FontY)
+	if(fontSize != fontY)
 	{
 		CONSOLE_FONT_INFOEX cfi;
 		cfi.cbSize = sizeof(cfi);
 		cfi.nFont = 0;
-		cfi.dwFontSize.X = FontX;
-		cfi.dwFontSize.Y = FontY;
-		fontSize = FontY;
+		cfi.dwFontSize.X = fontX;
+		cfi.dwFontSize.Y = fontY;
+		fontSize = fontY;
 		cfi.FontFamily = FF_DONTCARE;
 		cfi.FontWeight = FW_NORMAL;
 		wcscpy_s(cfi.FaceName, L"Consolas"); // Choose your font
@@ -61,7 +79,6 @@ void Screen::setFont(int FontX, int FontY)
 		fullScreen();
 		if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
 		{
-			// an error occourred
 			std::cerr << "Cannot determine console size." << std::endl;
 		}
 		else
@@ -73,16 +90,16 @@ void Screen::setFont(int FontX, int FontY)
 	}
 }
 
-void Screen::setWindow(int ConsWidth, int ConsHeight)
+void Screen::setWindow(short consoleWidth, short consoleHeight)
 {
-	_COORD coord;
-	coord.X = ConsWidth;
-	coord.Y = ConsHeight;
-	_SMALL_RECT Rect;
+	_COORD coord{};
+	coord.X = consoleWidth;
+	coord.Y = consoleHeight;
+	_SMALL_RECT Rect{};
 	Rect.Top = 0;
 	Rect.Left = 0;
-	Rect.Bottom = ConsHeight - 1;
-	Rect.Right = ConsWidth - 1;
+	Rect.Bottom = consoleHeight - 1;
+	Rect.Right = consoleWidth - 1;
 	HANDLE Handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleScreenBufferSize(Handle, coord);
 	SetConsoleWindowInfo(Handle, TRUE, &Rect);
@@ -115,18 +132,18 @@ void Screen::clearScreen()
 	printf("\033[2J");
 }
 
-void Screen::gotoXY(int x, int y)
+void Screen::gotoXY(const short x, const short y)
 {
-	COORD coordinates = {(short)x, (short)y};
+	COORD coordinates = {x, y};
 	HANDLE outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	SetConsoleCursorPosition(outputHandle, coordinates);
 }
 
-void Screen::moveConsole(int x, int y)
+void Screen::moveConsole(const int x, const int y)
 {
 	HWND consoleWindow = GetConsoleWindow();
-	SetWindowPos( consoleWindow, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER );
+	SetWindowPos( consoleWindow, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER );
 }
 
 void Screen::reset()
@@ -138,11 +155,11 @@ void Screen::reset()
 	setWindow(120, 30);
 }
 
-int Screen::getMaxConsoleWidth()
+int Screen::getMaxConsoleWidth() const
 {
 	return maxConsoleWidth;
 }
-int Screen::getMaxConsoleHeight()
+int Screen::getMaxConsoleHeight() const
 {
 	return maxConsoleHeight;
 }

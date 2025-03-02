@@ -1,14 +1,18 @@
-include_directories(${PROJECT_SOURCE_DIR}/lib/SFML-2.5.1/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/InteractiveConsoleMenu)
-
-# cmake_policy(SET CMP0074 OLD)
-
-set(SFML_STATIC_LIBRARIES TRUE)
-find_package(SFML REQUIRED COMPONENTS system window graphics audio)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+include(FetchContent)
+set(FETCHCONTENT_QUIET FALSE)
+
+FetchContent_Declare(SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.0
+        GIT_SHALLOW TRUE
+        EXCLUDE_FROM_ALL
+        SYSTEM)
+FetchContent_MakeAvailable(SFML)
 
 add_executable(${PROJECT_NAME}
     ConsoleGraph.cpp
@@ -22,9 +26,15 @@ add_executable(${PROJECT_NAME}
     VideoToAscii.h
     ${PROJECT_SOURCE_DIR}/lib/InteractiveConsoleMenu/Menu.h
     )
-    
-target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-audio)
 
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        $<TARGET_FILE:SFML::Graphics>
+#        $<TARGET_FILE:SFML::Audio>
+#        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+#target_link_libraries(${PROJECT_NAME} SDL3_image::SDL3_image SDL3::SDL3)
+
+target_link_libraries(${PROJECT_NAME} SFML::Graphics SFML::Audio)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 
 # message(STATUS "${CMAKE_PREFIX_PATH}")
